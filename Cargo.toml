@@ -1,0 +1,13 @@
+[package]
+name = "create-neon-api"
+version = "0.1.0"
+edition = "2024"
+authors = ["Peter Mwangi kylepeterkoine4@gmail.com"]
+description = "A CLI tool to bootstrap a clean, production-ready Rust backend with JWT authentication and Neon PostgreSQL database."
+license = "MIT"
+repository = "https://github.com/peterkyle01/create-neon-api.git"
+
+[dependencies]
+clap = { version = "4.5.38", features = ["derive"] }
+git2 = "0.18.2"
+colored = "2.0"
