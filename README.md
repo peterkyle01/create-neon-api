@@ -41,7 +41,11 @@ cargo install --path .
 
 ## 🚀 Usage
 
-After installation, simply run the tool from anywhere in your terminal:
+You can use the tool in two ways:
+
+### Option 1: Interactive Mode
+
+Run the tool and follow the prompts:
 
 ```bash
 create-neon-api
@@ -61,6 +65,16 @@ The tool will start with a beautiful interactive interface:
 Next steps: `cd my-awesome-api`, configure your `.env` file, and run `cargo run`.
 ```
 
+### Option 2: Direct Project Name
+
+Provide the project name directly as an argument:
+
+```bash
+create-neon-api my-new-project
+```
+
+This will skip the interactive prompt and create the project immediately.
+
 ### Quick Start
 
 1. **Install the tool:**
@@ -72,10 +86,14 @@ Next steps: `cd my-awesome-api`, configure your `.env` file, and run `cargo run`
 2. **Create a new project:**
 
    ```bash
+   # Interactive mode
    create-neon-api
+
+   # Or provide project name directly
+   create-neon-api my-awesome-api
    ```
 
-3. **Follow the prompts** and enter your project name
+3. **Follow the prompts** (if using interactive mode) and enter your project name
 
 4. **Start developing:**
    ```bash
