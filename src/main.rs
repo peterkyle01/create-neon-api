@@ -1,4 +1,5 @@
 use colored::*;
+use std::env;
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
@@ -12,15 +13,22 @@ fn main() {
     );
     println!("{}", "═══════════════════════════════════".bright_cyan());
 
-    // Prompt for project name
-    print!("{}", "📝 Enter your project name: ".bright_yellow().bold());
-    io::stdout().flush().unwrap();
+    // Check for command line arguments
+    let args: Vec<String> = env::args().collect();
+    let project_name = if args.len() > 1 {
+        // Use the first argument as project name
+        args[1].trim().to_string()
+    } else {
+        // Prompt for project name if no argument provided
+        print!("{}", "📝 Enter your project name: ".bright_yellow().bold());
+        io::stdout().flush().unwrap();
 
-    let mut project_name = String::new();
-    io::stdin()
-        .read_line(&mut project_name)
-        .expect("Failed to read input");
-    let project_name = project_name.trim();
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read input");
+        input.trim().to_string()
+    };
 
     if project_name.is_empty() {
         eprintln!("{}", "❌ Project name cannot be empty!".bright_red().bold());
@@ -28,14 +36,14 @@ fn main() {
     }
 
     // Validate project name (basic validation for Cargo package names)
-    if !is_valid_package_name(project_name) {
+    if !is_valid_package_name(&project_name) {
         eprintln!("{}", "❌ Invalid project name! Use only lowercase letters, numbers, hyphens, and underscores.".bright_red().bold());
         return;
     }
 
     // Replace with the URL of your GitHub template repository.
     let template_url = "https://github.com/peterkyle01/rust-backend-template.git";
-    let project_path = Path::new(project_name);
+    let project_path = Path::new(&project_name);
 
     println!(
         "{} '{}'...",
@@ -67,7 +75,7 @@ fn main() {
     }
 
     // Update the Cargo.toml with the new project name
-    update_cargo_toml(project_path, project_name);
+    update_cargo_toml(project_path, &project_name);
 
     // Run an initial build to fetch and compile dependencies.
     println!(
