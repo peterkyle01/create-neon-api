@@ -2,7 +2,14 @@
 name = "create-neon-api"
 version = "0.2.1"
 edition = "2021"
-include = ["**/*"]
+include = [
+    "Cargo.toml",
+    "Cargo.lock",
+    "LICENSE",
+    "README.md",
+    ".gitignore",
+    "src/**/*",
+]
 authors = ["Peter Mwangi <kylepeterkoine4@gmail.com>"]
 description = "A modern CLI to bootstrap production-ready Rust backends powered by the Neon Data API — serverless Postgres via REST."
 license = "MIT"

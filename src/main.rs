@@ -109,6 +109,20 @@ fn main() {
         std::process::exit(1);
     }
 
+    // Rename the template Cargo.toml back (it's shipped as .template so
+    // Cargo doesn't treat the template directory as a sub-package).
+    let template_toml = project_path.join("Cargo.toml.template");
+    let real_toml = project_path.join("Cargo.toml");
+    if template_toml.exists() {
+        if let Err(e) = fs::rename(&template_toml, &real_toml) {
+            eprintln!(
+                "{}  failed to rename Cargo.toml.template: {}",
+                "warning:".bright_yellow(),
+                e
+            );
+        }
+    }
+
     update_cargo_toml(project_path, &project_name, cli.quiet);
 
     if !cli.no_build {
