@@ -1,214 +1,68 @@
-# 🚀 Create Neon API
+# create-neon-api
 
 [![Crates.io](https://img.shields.io/crates/v/create-neon-api.svg)](https://crates.io/crates/create-neon-api)
-[![Downloads](https://img.shields.io/crates/d/create-neon-api.svg)](https://crates.io/crates/create-neon-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A beautiful CLI tool to bootstrap clean, production-ready Rust backend projects with JWT authentication and Neon PostgreSQL database integration.
+Scaffold a Rust backend wired for the Neon Data API in a single command.
 
-**📦 Available on [crates.io/crates/create-neon-api](https://crates.io/crates/create-neon-api)!**
+The generated project includes JWT authentication (compatible with PostgREST
+Row-Level Security), Argon2id password hashing, and an HTTP client pre-configured
+for the Neon Data API.  No ORM, no Docker, no connection pools — just HTTP to
+your serverless Postgres.
 
-## ✨ Features
-
-- 🎨 **Beautiful CLI Interface** - Colorful and interactive prompts
-- 📦 **Template-based** - Clones from a pre-configured Rust backend template
-- 🔧 **Auto-configuration** - Automatically updates project name in `Cargo.toml`
-- 🏗️ **Ready to Build** - Runs initial `cargo build` to fetch dependencies
-- ✅ **Validation** - Ensures project names follow Cargo package naming conventions
-- 🔐 **Production Ready** - Includes JWT authentication and PostgreSQL integration
-
-## 📋 Prerequisites
-
-- [Rust](https://rustup.rs/) (latest stable version)
-- [Git](https://git-scm.com/)
-- Internet connection for cloning the template
-
-## 🛠️ Installation
-
-### Option 1: Install from Crates.io (Recommended)
+## Install
 
 ```bash
 cargo install create-neon-api
 ```
 
-### Option 2: Install from Source
+## Usage
 
 ```bash
-git clone https://github.com/peterkyle01/create-neon-api.git
-cd create-neon-api
-cargo install --path .
+create-neon-api                # interactive prompt
+create-neon-api my-api         # scaffold directly
+create-neon-api my-api -B      # skip cargo build
+create-neon-api my-api -q      # quiet (scripts / CI)
 ```
 
-## 🚀 Usage
+## What you get
 
-You can use the tool in two ways:
+```
+my-api/
+├── src/
+│   ├── main.rs            # Axum server, routes
+│   ├── config.rs          # env-based configuration
+│   ├── auth.rs            # JWT + Argon2id
+│   ├── data_api.rs        # Neon Data API HTTP client
+│   ├── errors.rs          # unified error type
+│   ├── models.rs          # request / response types
+│   ├── handlers/          # signup, login, me
+│   └── middleware/        # JWT verification
+├── migrations/            # SQL schema + RLS policies
+├── Cargo.toml
+├── justfile
+├── .env.example
+└── LICENSE
+```
 
-### Option 1: Interactive Mode
-
-Run the tool and follow the prompts:
+## After scaffolding
 
 ```bash
-create-neon-api
+cd your-project
+cp .env.example .env    # add your Neon credentials
+# run migrations/schema.sql in the Neon SQL Editor
+cargo run               # → http://localhost:8080
 ```
 
-The tool will start with a beautiful interactive interface:
+## Endpoints
 
-```
-🚀 Rust Backend Project Generator
-═══════════════════════════════════
-📝 Enter your project name: my-awesome-api
-🚀 Creating project 'my-awesome-api'...
-✅ Template cloned successfully!
-📝 Updated Cargo.toml with project name
-📦 Running initial `cargo build`...
-🎉 Project created successfully!
-Next steps: `cd my-awesome-api`, configure your `.env` file, and run `cargo run`.
-```
+| Method | Path      | Auth   | Description  |
+| ------ | --------- | ------ | ------------ |
+| GET    | /health   | public | health check |
+| POST   | /signup   | public | create user  |
+| POST   | /login    | public | get JWT      |
+| GET    | /me       | Bearer | user profile |
 
-### Option 2: Direct Project Name
+## License
 
-Provide the project name directly as an argument:
-
-```bash
-create-neon-api my-new-project
-```
-
-This will skip the interactive prompt and create the project immediately.
-
-### Quick Start
-
-1. **Install the tool:**
-
-   ```bash
-   cargo install create-neon-api
-   ```
-
-2. **Create a new project:**
-
-   ```bash
-   # Interactive mode
-   create-neon-api
-
-   # Or provide project name directly
-   create-neon-api my-awesome-api
-   ```
-
-3. **Follow the prompts** (if using interactive mode) and enter your project name
-
-4. **Start developing:**
-   ```bash
-   cd your-project-name
-   cp .env.example .env
-   # Edit .env with your configuration
-   cargo run
-   ```
-
-### Project Name Validation
-
-The tool validates project names to ensure they follow Cargo package naming conventions:
-
-- ✅ Lowercase letters, numbers, hyphens, and underscores only
-- ✅ Cannot start or end with hyphens
-- ✅ Cannot be empty
-
-Examples:
-
-- ✅ `my-api-server`
-- ✅ `user_service`
-- ✅ `backend2024`
-- ❌ `My-API` (uppercase letters)
-- ❌ `-invalid-start` (starts with hyphen)
-- ❌ `invalid@name` (special characters)
-
-## 📁 What You Get
-
-The generated project includes:
-
-- 🔐 **JWT Authentication** - Ready-to-use authentication system
-- 🗄️ **PostgreSQL Integration** - With Neon database support
-- 🌐 **RESTful API Structure** - Well-organized endpoints
-- ⚙️ **Environment Configuration** - `.env` file support
-- 🧪 **Testing Setup** - Unit and integration tests
-- 📝 **Documentation** - Comprehensive API documentation
-- 🚀 **Production Ready** - Optimized for deployment
-
-## 🔧 Next Steps After Project Creation
-
-1. **Navigate to your project:**
-
-   ```bash
-   cd your-project-name
-   ```
-
-2. **Configure environment variables:**
-
-   ```bash
-   cp .env.example .env
-   # Edit .env with your database credentials and JWT secret
-   ```
-
-3. **Run the development server:**
-
-   ```bash
-   cargo run
-   ```
-
-4. **Run tests:**
-   ```bash
-   cargo test
-   ```
-
-## 🎯 Template Repository
-
-This tool clones from the [Rust Backend Template](https://github.com/peterkyle01/rust-backend-template) repository, which includes:
-
-- **Axum** web framework
-- **SQLx** for database operations
-- **JWT** for authentication
-- **Serde** for serialization
-- **Tokio** async runtime
-- **Configuration management**
-- **Error handling**
-- **Logging**
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**Peter Mwangi**
-
-- Email: kylepeterkoine4@gmail.com
-- GitHub: [@peterkyle01](https://github.com/peterkyle01)
-
-## 🙏 Acknowledgments
-
-- Thanks to the Rust community for the amazing ecosystem
-- Inspired by create-react-app and similar bootstrapping tools
-- Built with love for the Rust backend development community
-
-## 📊 Version History
-
-- **v0.1.1** - Latest release
-  - Published and available on crates.io! 🎉
-  - Updated documentation and examples
-- **v0.1.0** - Initial release
-  - Interactive CLI interface
-  - Template cloning and configuration
-  - Project name validation
-  - Automatic dependency building
-
----
-
-**Happy coding! 🦀✨**
+MIT — see [LICENSE](LICENSE).

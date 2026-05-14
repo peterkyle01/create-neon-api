@@ -1,0 +1,40 @@
+# list available recipes
+default:
+    @just --list
+
+# compile the project
+build:
+    cargo build
+
+# start the server (development)
+run:
+    cargo run
+
+# run all tests
+test:
+    cargo test
+
+# remove build artifacts
+clean:
+    cargo clean
+
+# format source code
+fmt:
+    cargo fmt
+
+# run clippy lints
+lint:
+    cargo clippy -- -D warnings
+
+# fmt + lint + test
+check: fmt lint test
+
+# optimised production build
+release:
+    cargo build --release
+
+# apply the schema (set DATABASE_URL in .env first)
+migrate:
+    @echo "run the schema against your Neon database:"
+    @echo "  psql \"$DATABASE_URL\" -f migrations/schema.sql"
+    @echo "or paste migrations/schema.sql into the Neon SQL Editor"
