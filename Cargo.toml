@@ -2,21 +2,13 @@
 name = "create-neon-api"
 version = "0.2.1"
 edition = "2021"
+include = ["**/*"]
 authors = ["Peter Mwangi <kylepeterkoine4@gmail.com>"]
 description = "A modern CLI to bootstrap production-ready Rust backends powered by the Neon Data API — serverless Postgres via REST."
 license = "MIT"
 repository = "https://github.com/peterkyle01/create-neon-api.git"
 keywords = ["neon", "postgres", "api", "backend", "generator"]
 categories = ["command-line-utilities", "development-tools"]
-include = [
-    "Cargo.lock",
-    "Cargo.toml",
-    "LICENSE",
-    "README.md",
-    ".gitignore",
-    "src/**/*.rs",
-    "src/neon-api-template/**/*",
-]
 
 [dependencies]
 clap = { version = "4.5", features = ["derive", "color"] }
