@@ -3,7 +3,8 @@
 [![Crates.io](https://img.shields.io/crates/v/create-neon-api.svg)](https://crates.io/crates/create-neon-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Scaffold a Rust backend wired for the Neon Data API in a single command.
+Scaffold a Rust backend wired for the Neon Data API in a single command —
+no network needed, the template is embedded in the binary.
 
 The generated project includes JWT authentication (compatible with PostgREST
 Row-Level Security), Argon2id password hashing, and an HTTP client pre-configured

@@ -1,21 +1,19 @@
 use clap::Parser;
 use colored::Colorize;
+use include_dir::{include_dir, Dir};
 use indicatif::{ProgressBar, ProgressStyle};
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
 use std::process::Command;
 
-/// Bootstrap a Rust backend wired for the Neon Data API.
-///
-/// Clones the neon-api-template, rewires Cargo.toml with your project name,
-/// and optionally runs an initial build.  Run without arguments for an
-/// interactive prompt.
+static TEMPLATE: Dir = include_dir!("src/neon-api-template");
+
 #[derive(Parser, Debug)]
 #[command(
     name = "create-neon-api",
     version,
-    about,
+    about = "Bootstrap a Rust backend wired for the Neon Data API",
     long_about = None,
     styles = clap_style(),
     after_help = "\
@@ -25,15 +23,17 @@ use std::process::Command;
   \x1b[1mcreate-neon-api my-api --no-build\x1b[0m    # Skip initial cargo build"
 )]
 pub struct Cli {
-    /// Project name (prompts interactively if omitted)
+    #[arg(help = "Project name (prompts interactively if omitted)")]
     pub project_name: Option<String>,
 
-    /// Skip running `cargo build` after scaffolding
-    #[arg(short = 'B', long = "no-build")]
+    #[arg(
+        short = 'B',
+        long = "no-build",
+        help = "Skip running `cargo build` after scaffolding"
+    )]
     pub no_build: bool,
 
-    /// Print only errors — useful in scripts
-    #[arg(short = 'q', long = "quiet")]
+    #[arg(short = 'q', long = "quiet", help = "Print only errors")]
     pub quiet: bool,
 }
 
@@ -60,8 +60,8 @@ fn main() {
     }
 
     let project_name = match cli.project_name {
-        Some(name) => name.trim().to_string(),
-        None => prompt_project_name(),
+        Some(ref name) if !name.trim().is_empty() => name.trim().to_string(),
+        _ => prompt_project_name(),
     };
 
     if project_name.is_empty() {
@@ -86,40 +86,27 @@ fn main() {
         std::process::exit(1);
     }
 
-    let template_url = "https://github.com/peterkyle01/neon-api-template.git";
-
     if !cli.quiet {
-        eprintln!("{} cloning template...", "→".bright_cyan().bold());
+        eprintln!("{} extracting template...", "→".bright_cyan().bold());
     }
 
-    let spinner = if !cli.quiet {
-        let s = ProgressBar::new_spinner();
-        s.set_style(
-            ProgressStyle::with_template("{spinner:.cyan} {msg}")
-                .unwrap()
-                .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"),
+    // Create the root directory first—Dir::extract() doesn't create it
+    if let Err(e) = fs::create_dir_all(project_path) {
+        eprintln!(
+            "{}  failed to create project: {}",
+            "error:".bright_red().bold(),
+            e
         );
-        s.set_message("cloning");
-        Some(s)
-    } else {
-        None
-    };
-
-    if let Err(e) = clone_template(template_url, project_path) {
-        if let Some(ref s) = spinner {
-            s.finish_with_message("failed");
-        }
-        eprintln!("{}  clone failed: {}", "error:".bright_red().bold(), e);
         std::process::exit(1);
     }
 
-    if let Some(ref s) = spinner {
-        s.finish_with_message("done");
-    }
-
-    let git_dir = project_path.join(".git");
-    if git_dir.exists() {
-        let _ = fs::remove_dir_all(&git_dir);
+    if let Err(e) = TEMPLATE.extract(project_path) {
+        eprintln!(
+            "{}  failed to create project: {}",
+            "error:".bright_red().bold(),
+            e
+        );
+        std::process::exit(1);
     }
 
     update_cargo_toml(project_path, &project_name, cli.quiet);
@@ -161,16 +148,6 @@ fn is_valid_package_name(name: &str) -> bool {
             .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-' || c == '_')
         && !name.starts_with('-')
         && !name.ends_with('-')
-}
-
-fn clone_template(url: &str, dest: &Path) -> Result<(), String> {
-    git2::Repository::clone(url, dest).map(|_| ()).map_err(|e| {
-        if e.code() == git2::ErrorCode::NotFound {
-            "git is not installed or not on PATH — install git and try again".to_string()
-        } else {
-            format!("{e}")
-        }
-    })
 }
 
 fn update_cargo_toml(project_path: &Path, project_name: &str, quiet: bool) {

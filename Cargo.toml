@@ -1,6 +1,6 @@
 [package]
 name = "create-neon-api"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Peter Mwangi <kylepeterkoine4@gmail.com>"]
 description = "A modern CLI to bootstrap production-ready Rust backends powered by the Neon Data API — serverless Postgres via REST."
@@ -11,7 +11,7 @@ categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
 clap = { version = "4.5", features = ["derive", "color"] }
-git2 = { version = "0.19", default-features = false, features = ["vendored-libgit2"] }
 colored = "3.0"
 indicatif = "0.17"
 anstyle = "1.0"
+include_dir = "0.7"
