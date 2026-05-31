@@ -10,14 +10,14 @@ async fn main() -> anyhow::Result<()> {
         .without_time()
         .init();
 
-    let config = Arc::new({{project_name}}::config::Config::from_env()?);
+    let config = Arc::new(neon_api_app::config::Config::from_env()?);
 
     let addr = format!("{}:{}", config.host, config.port);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
 
     tracing::info!("listening on {}", addr);
 
-    let app = {{project_name}}::routes(config);
+    let app = neon_api_app::routes(config);
     axum::serve(listener, app).await?;
 
     Ok(())

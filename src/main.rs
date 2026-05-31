@@ -123,6 +123,7 @@ fn main() {
         }
     }
 
+    replace_placeholders(project_path, &project_name, cli.quiet);
     update_cargo_toml(project_path, &project_name, cli.quiet);
 
     if !cli.no_build {
@@ -162,6 +163,56 @@ fn is_valid_package_name(name: &str) -> bool {
             .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-' || c == '_')
         && !name.starts_with('-')
         && !name.ends_with('-')
+}
+
+/// Convert a package name (e.g. "my-api") to a valid Rust crate name (e.g. "my_api").
+fn sanitize_crate_name(name: &str) -> String {
+    name.replace('-', "_")
+}
+
+/// Replace `neon_api_app` placeholders in all extracted source files with the
+/// actual crate name (hyphens converted to underscores).
+fn replace_placeholders(project_path: &Path, project_name: &str, quiet: bool) {
+    let crate_name = sanitize_crate_name(project_name);
+
+    // Recursively walk all files in the project directory
+    fn visit(dir: &Path, crate_name: &str, quiet: bool) {
+        let entries = match fs::read_dir(dir) {
+            Ok(e) => e,
+            Err(_) => return,
+        };
+
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                visit(&path, crate_name, quiet);
+            } else if let Some(ext) = path.extension() {
+                if ext == "rs" || ext == "toml" {
+                    let content = match fs::read_to_string(&path) {
+                        Ok(c) => c,
+                        Err(_) => continue,
+                    };
+
+                    if !content.contains("neon_api_app") {
+                        continue;
+                    }
+
+                    let updated = content.replace("neon_api_app", crate_name);
+                    if let Err(e) = fs::write(&path, updated) {
+                        eprintln!("{}  {}: {}", "warning:".bright_yellow(), path.display(), e);
+                    } else if !quiet {
+                        eprintln!(
+                            "{}  {}",
+                            "✓".bright_green().bold(),
+                            path.file_name().unwrap().to_string_lossy()
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    visit(project_path, &crate_name, quiet);
 }
 
 fn update_cargo_toml(project_path: &Path, project_name: &str, quiet: bool) {

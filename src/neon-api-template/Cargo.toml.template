@@ -1,5 +1,5 @@
 [package]
-name = "{{project_name}}"
+name = "neon-api-app"
 version = "0.1.0"
 edition = "2024"
 
@@ -17,9 +17,4 @@ utility-types = "0.0.4"
 url = "2"
 urlencoding = "2"
 tower-http = { version = "0.6", features = ["trace"] }
-
-[profile.release]
-lto = true
-codegen-units = 1
-panic = "abort"
-strip = true
+base64 = "0.22"

@@ -3,13 +3,29 @@
 [![Crates.io](https://img.shields.io/crates/v/create-neon-api.svg)](https://crates.io/crates/create-neon-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Scaffold a Rust backend wired for the Neon Data API in a single command —
+Scaffold a Rust API backend wired for [Neon](https://neon.tech) in a single command —
 no network needed, the template is embedded in the binary.
 
-The generated project includes JWT authentication (compatible with PostgREST
-Row-Level Security), Argon2id password hashing, and an HTTP client pre-configured
-for the Neon Data API.  No ORM, no Docker, no connection pools — just HTTP to
-your serverless Postgres.
+The generated project uses **Axum** for the web framework, **Neon Auth** for authentication,
+and the **Neon Data API** for CRUD operations — all over HTTP. No ORM, no connection pool,
+no Docker, no system OpenSSL (uses `rustls`).
+
+> **⚠️ Not production-ready out of the box.** This is a starter template intended
+> to accelerate development. Before deploying to production, review authentication,
+> authorization, rate limiting, input validation, error handling, secrets management,
+> and security hardening for your specific use case.
+
+## Features
+
+- **Axum web framework** – fast, ergonomic, and async-first
+- **Neon Auth** – sign-up, sign-in, sign-out, and JWT-based session management
+- **Neon Data API CRUD** – generic `create`/`get_all`/`get_one`/`update`/`delete` that works for any table
+- **`NeonClient` extractor** – automatically pulls the JWT from `Authorization: Bearer` via Axum's `FromRequestParts`
+- **Auto-generated types** – `utility-types` reduces boilerplate (e.g. `SignInRequest` derived from `SignUpRequest`)
+- **Standard API envelope** – all responses follow `{ "data": ... }` / `{ "error": { "code": "...", "message": "..." } }`
+- **Smart health checks** – verifies both Auth and Data API endpoints are reachable
+- **Level-based logging** – `INFO` for 2xx, `WARN` for 4xx, `ERROR` for 5xx
+- **Comprehensive tests** – integration tests covering the full CRUD flow and error scenarios
 
 ## Install
 
@@ -31,17 +47,20 @@ create-neon-api my-api -q      # quiet (scripts / CI)
 ```
 my-api/
 ├── src/
-│   ├── main.rs            # Axum server, routes
-│   ├── config.rs          # env-based configuration
-│   ├── auth.rs            # JWT + Argon2id
-│   ├── data_api.rs        # Neon Data API HTTP client
-│   ├── errors.rs          # unified error type
-│   ├── models.rs          # request / response types
-│   ├── handlers/          # signup, login, me
-│   └── middleware/        # JWT verification
-├── migrations/            # SQL schema + RLS policies
+│   ├── main.rs            # Axum server entry point
+│   ├── lib.rs             # Router, routes(), TraceLayer
+│   ├── response.rs        # Standard API envelope, AppError, helpers
+│   ├── config/
+│   │   ├── mod.rs         # Config struct (AUTH_URL, DATA_API_URL, etc.)
+│   │   └── client.rs      # NeonClient — auth + CRUD over HTTP
+│   └── handlers/
+│       ├── mod.rs
+│       ├── auth.rs        # sign_up, sign_in, sign_out, get_me
+│       ├── notes.rs       # Note CRUD handlers
+│       └── health.rs      # Health check with component status
+├── tests/
+│   └── api.rs             # Full integration tests
 ├── Cargo.toml
-├── justfile
 ├── .env.example
 └── LICENSE
 ```
@@ -49,20 +68,48 @@ my-api/
 ## After scaffolding
 
 ```bash
-cd your-project
-cp .env.example .env    # add your Neon credentials
-# run migrations/schema.sql in the Neon SQL Editor
-cargo run               # → http://localhost:8080
+cd my-api
+cp .env.example .env        # add your Neon credentials
+# create the notes table in your Neon SQL editor
+cargo run                   # → http://localhost:8080
 ```
 
-## Endpoints
+## API Endpoints (generated project)
 
-| Method | Path      | Auth   | Description  |
-| ------ | --------- | ------ | ------------ |
-| GET    | /health   | public | health check |
-| POST   | /signup   | public | create user  |
-| POST   | /login    | public | get JWT      |
-| GET    | /me       | Bearer | user profile |
+| Method   | Path                     | Auth   | Description       |
+|----------|--------------------------|--------|-------------------|
+| GET      | `/health`                | public | health check      |
+| POST     | `/api/v1/auth/sign-up`   | public | register          |
+| POST     | `/api/v1/auth/sign-in`   | public | sign in           |
+| POST     | `/api/v1/auth/sign-out`  | Bearer | sign out          |
+| GET      | `/api/v1/auth/me`        | Bearer | JWT payload info  |
+| GET      | `/api/v1/notes`          | Bearer | list notes        |
+| POST     | `/api/v1/notes`          | Bearer | create note       |
+| GET      | `/api/v1/notes/{id}`     | Bearer | get note          |
+| PATCH    | `/api/v1/notes/{id}`     | Bearer | update note       |
+| DELETE   | `/api/v1/notes/{id}`     | Bearer | delete note       |
+
+## How it works
+
+```
+create-neon-api my-api
+        │
+        ▼
+   ┌─────────────────────────────┐
+   │  Embedded template          │
+   │  (include_dir! macro)       │
+   └─────────┬───────────────────┘
+             │ extract to ./my-api
+             ▼
+   ┌─────────────────────────────┐
+   │  1. Rename Cargo.toml       │
+   │  2. Replace neon_api_app    │
+   │     placeholders in all     │
+   │     .rs & .toml files       │
+   │  3. Update Cargo.toml name  │
+   │  4. cargo build (optional)  │
+   └─────────────────────────────┘
+```
 
 ## License
 

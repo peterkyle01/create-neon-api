@@ -7,15 +7,20 @@ use std::sync::Arc;
 use axum::Router;
 use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 
+/// Build the application router, wiring paths to handler functions.
 pub fn routes(config: Arc<config::Config>) -> Router {
     Router::new()
-        .route("/health", axum::routing::get(handlers::health::health_check))
+        .route(
+            "/health",
+            axum::routing::get(handlers::health::health_check),
+        )
         .nest(
             "/api/v1/auth",
             Router::new()
                 .route("/sign-up", axum::routing::post(handlers::auth::sign_up))
                 .route("/sign-in", axum::routing::post(handlers::auth::sign_in))
-                .route("/sign-out", axum::routing::post(handlers::auth::sign_out)),
+                .route("/sign-out", axum::routing::post(handlers::auth::sign_out))
+                .route("/me", axum::routing::get(handlers::auth::get_me)),
         )
         .nest(
             "/api/v1/notes",
@@ -35,7 +40,9 @@ pub fn routes(config: Arc<config::Config>) -> Router {
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(
-                    DefaultMakeSpan::new().include_headers(false).level(tracing::Level::INFO),
+                    DefaultMakeSpan::new()
+                        .include_headers(false)
+                        .level(tracing::Level::INFO),
                 )
                 .on_response(LogOnResponse),
         )
