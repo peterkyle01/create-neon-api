@@ -1,6 +1,6 @@
 [package]
 name = "create-neon-api"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 include = [
     "Cargo.toml",
@@ -14,7 +14,7 @@ authors = ["Peter Mwangi <kylepeterkoine4@gmail.com>"]
 description = "Bootstrap production-ready Rust backends built with Axum and the Neon Data API — serverless Postgres via REST, with built-in Auth."
 license = "MIT"
 repository = "https://github.com/peterkyle01/create-neon-api.git"
-keywords = ["neon", "postgres", "api", "backend", "generator", "axum", "serverless"]
+keywords = ["neon", "postgres", "api", "backend", "axum"]
 categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
